@@ -5,6 +5,10 @@ simple w32 temp
 
 `Open myMiniRender.vcxproj with VisualStudio`
 
+## Example
+
+![img](./img/example.jpg)
+
 ## Reference
 https://github.com/ssloy/tinyrenderer
 
