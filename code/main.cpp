@@ -1,0 +1,110 @@
+﻿#include <iostream>
+#include <cmath>
+
+#include "device.h"
+#include "screen.h"
+
+#include "geometry.h"
+#include "tool.h"
+//using namespace std;
+//-----------------------------------------
+void onLoad();
+void gameMain();
+void update(float deltatime);
+void render();
+//-----------------------------------------
+const int width = 600, height = 600, depth = 255;
+Device device;
+//--------------------------------------------------------
+
+int main(void) {
+	const TCHAR* title = _T("Win32");
+	if (screen_init(width, height, title))
+		return -1;
+
+	device.init(width, height, screen_fb);
+	device.background = rgb2hex(0.85 * 255, 0.85 * 255, 1 * 255); // set background color
+
+	onLoad();
+	while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0) {
+		screen_dispatch(); // system_event
+
+		gameMain();
+
+		screen_update();// show framebuffer to screen
+		//Sleep(1);// 1~n ms, if running too fast
+	}
+	return 0;
+}
+
+
+Vec2f player;
+Vec2f speed;
+int playerW = 30, playerH = 50;
+
+// start
+void onLoad() {
+	std::cout << "Start\n";
+
+	player = Vec2f(10, 20);
+	speed = Vec2f(400, 100);
+}
+void gameMain() {
+	fpsCounting();
+	showFps(device);
+
+	update(deltaT / 1000.0f);
+
+	device.clear();
+	render();
+}
+
+void update(float dt) {
+	//cout << deltatime << "\n";
+	if (screen_keys[VK_SPACE]) {
+		std::cout << "press space\n";
+	}
+	if (screen_keys['W']) {
+		std::cout << "press w\n";
+	}
+
+	//------------------
+
+	//player.x += speed.x * dt;
+	//player.y += speed.y * dt;
+	player = player + speed * dt;
+
+	if ((player.x > width && speed.x > 0) || (player.x < 0 && speed.x < 0))speed.x *= -1;
+	if ((player.y > width && speed.y > 0) || (player.y < 0 && speed.y < 0))speed.y *= -1;
+}
+
+int testx = 100;
+void render() {
+	// draw player
+	device.fillTriangle2(
+		Vec3f(player.x, player.y, 0),
+		Vec3f(player.x - playerW, player.y + playerH, 0),
+		Vec3f(player.x + playerW, player.y + playerH, 0),
+		0xff0000);
+
+
+	//--test--
+	// move 1 pixel each frame
+	testx = (testx + 1) % device.width;
+	for (int i = 0; i < 10; i++)
+		device.setPixel(testx - i, 10, 0x000000);
+
+	// draw cross, color format: 0xRRGGBB
+	device.drawLine(400, 100, 500, 200, 0xff0000);// red
+	device.drawLine(500, 100, 400, 200, 0x0000ff);// blue
+
+	// draw triangle & wire frame
+	device.fillTriangle2(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0xff7700);
+	device.drawTriangle(Vec3f(300, 100, 0), Vec3f(250, 200, 0), Vec3f(350, 190, 0), 0x000000);
+
+
+	//fill rect
+	int x1 = 50, y1 = 50, rw = 50, rh = 50;
+	device.fillTriangle2(Vec3f(x1, y1, 0), Vec3f(x1 + rw, y1, 0), Vec3f(x1, y1 + rh, 0), 0x0077ff);
+	device.fillTriangle2(Vec3f(x1 + rw, y1, 0), Vec3f(x1, y1 + rh, 0), Vec3f(x1 + rw, y1 + rh, 0), 0x0077ff);
+}
